@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ order.id }} | Gameplan Apparel{% endblock %}
+{% block content %}
+<section class="page-banner order-detail-banner">
+  <div class="page-wrap">
+    <p class="eyebrow">ORDER DETAIL</p>
+    <h1>#{{ order.id }}</h1>
+    <p>Review the customer order, shipping details, and order status.</p>
+  </div>
+</section>
+
+<section class="page-wrap admin-panel order-detail-page">
+  <div class="panel order-detail-shell">
+    <div class="panel-heading">
+      <h2>Customer Order</h2>
+      <div class="shop-controls">
+        <a class="button button-outline button-small" href="{{ url_for('dashboard') }}">← Back to My Account</a>
+        <a class="button button-light button-small" href="{{ url_for('admin_orders') }}"><span aria-hidden="true">←</span> Back to Orders</a>
+      </div>
+    </div>
+
+    <div class="order-detail-grid">
+      <section class="order-info-card">
+        <div class="order-section-heading">
+          <span class="order-section-icon" aria-hidden="true">♧</span>
+          <h2>Shipping Information</h2>
+        </div>
+        <div class="order-detail-list">
+          <div><span aria-hidden="true">♙</span><p><strong>Customer:</strong> {{ order.full_name }}</p></div>
+          {% if order.customer_name and order.customer_name != order.full_name %}
+            <div><span aria-hidden="true">♙</span><p><strong>Account:</strong> {{ order.customer_name }}</p></div>
+          {% endif %}
+          <div><span aria-hidden="true">✉</span><p><strong>Email:</strong> <a href="mailto:{{ order.email }}">{{ order.email }}</a></p></div>
+          <div><span aria-hidden="true">☎</span><p><strong>Phone:</strong> <a href="tel:{{ order.phone }}">{{ order.phone }}</a></p></div>
+          <div><span aria-hidden="true">⌖</span><p><strong>Address:</strong> {{ order.address }}, {{ order.barangay }}, {{ order.city }}, {{ order.province }} {{ order.postal_code }}</p></div>
+          <div><span aria-hidden="true">▤</span><p><strong>Payment method:</strong> {{ order.payment_method|replace('_', ' ')|upper }}</p></div>
+          <div><span aria-hidden="true">▦</span><p><strong>Placed on:</strong> {{ order.created_at.strftime('%b %d, %Y %I:%M %p') }}</p></div>
+        </div>
+      </section>
+
+      <section class="order-status-card">
+        <div class="order-section-heading">
+          <span class="order-section-icon" aria-hidden="true">↗</span>
+          <h2>Update Order Status</h2>
+        </div>
+        <form class="order-status-form" method="post" action="{{ url_for('update_order_status', order_id=order.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <label for="status">Status</label>
+          <select id="status" name="status">
+            {% for status in ['pending', 'processing', 'shipped', 'completed', 'cancelled'] %}
+              <option value="{{ status }}" {% if order.status == status %}selected{% endif %}>{{ status|replace('_', ' ')|title }}</option>
+            {% endfor %}
+          </select>
+          <button class="button button-light" type="submit">Save Status</button>
+        </form>
+        <p class="order-status-current">Current status <span class="status-pill status-{{ order.status }}">{{ order.status|replace('_', ' ')|title }}</span></p>
+        <form class="order-delete-form" method="post" action="{{ url_for('delete_order', order_id=order.id) }}" data-confirm="Permanently delete order #{{ order.id }} and its items? This cannot be undone.">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="button button-danger button-small" type="submit">Delete order</button>
+        </form>
+      </section>
+    </div>
+
+    <section class="order-items-section">
+      <div class="order-section-heading">
+        <span class="order-section-icon" aria-hidden="true">◇</span>
+        <h2>Order Items</h2>
+      </div>
+      {% if items %}
+        <div class="orders-table-wrap">
+          <table class="orders-table order-items-table">
+            <thead>
+              <tr><th>Product</th><th>Size</th><th>Color</th><th>Unit Price</th><th>Qty</th><th class="order-items-total">Subtotal</th></tr>
+            </thead>
+            <tbody>
+              {% for item in items %}
+                <tr>
+                  <td>
+                    <div class="order-product">
+                      <div class="order-item-image">
+                        {% if item.image_url %}<img src="{{ item.image_url }}" alt="{{ item.product_name }}" loading="lazy">{% endif %}
+                        <span aria-hidden="true">GP</span>
+                      </div>
+                      <strong>{{ item.product_name }}</strong>
+                    </div>
+                  </td>
+                  <td>{{ item.size or '—' }}</td>
+                  <td>{{ item.color or '—' }}</td>
+                  <td>₱{{ "%.2f"|format(item.unit_price) }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td class="order-items-total">₱{{ "%.2f"|format(item.unit_price * item.quantity) }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="empty-note">No item details are available for this order.</p>
+      {% endif %}
+    </section>
+
+    <section class="order-totals-bar" aria-label="Order totals">
+      <div><span>Subtotal:</span><strong>₱{{ "%.2f"|format(order.subtotal) }}</strong></div>
+      <div><span>Shipping:</span><strong>₱{{ "%.2f"|format(order.shipping_fee) }}</strong></div>
+      <div class="order-grand-total"><span>Total:</span><strong>₱{{ "%.2f"|format(order.total) }}</strong></div>
+    </section>
+  </div>
+</section>
+{% endblock %}

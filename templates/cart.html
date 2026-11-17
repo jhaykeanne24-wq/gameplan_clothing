@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Your Bag | Gameplan Apparel{% endblock %}
+{% block content %}
+<section class="page-banner"><div class="page-wrap"><p class="eyebrow">YOUR BAG</p><h1>REVIEW YOUR PICKS.</h1><p>Review your items and complete your gameplan.</p></div></section>
+<section class="cart-layout page-wrap">
+  <div class="panel cart-panel">
+    <div class="panel-heading"><h2>♧ &nbsp;Bag Items ({{ items|length }})</h2></div>
+    {% if items %}
+      {% for item in items %}
+        <article class="cart-item">
+          <a class="cart-thumb" href="{{ url_for('product_detail', product_id=item.product.id) }}"><img src="{{ item.product.image_url or url_for('static', filename='img/product-placeholder.svg') }}" alt=""></a>
+          <div class="cart-description"><a href="{{ url_for('product_detail', product_id=item.product.id) }}"><strong>{{ item.product.name }}</strong></a><span>{{ item.product.category }}{% if item.size %} · Size {{ item.size }}{% endif %}{% if item.color %} · Color {{ item.color }}{% endif %}</span><small>Available: {{ item.product.stock }}</small></div>
+          <form method="post" action="{{ url_for('update_cart', product_id=item.product.id) }}" class="quantity-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% if item.size %}<input type="hidden" name="size" value="{{ item.size }}">{% endif %}
+            {% if item.color %}<input type="hidden" name="color" value="{{ item.color }}">{% endif %}
+            <label class="sr-only" for="qty-{{ item.cart_key|replace(':', '-') }}">Quantity for {{ item.product.name }}{% if item.size %} size {{ item.size }}{% endif %}{% if item.color %} color {{ item.color }}{% endif %}</label>
+            <input id="qty-{{ item.cart_key|replace(':', '-') }}" name="quantity" type="number" min="0" max="{{ [item.product.stock, 10]|min }}" value="{{ item.quantity }}">
+            <button type="submit" class="button button-outline button-small">Update</button>
+          </form>
+          <strong class="cart-line-price">₱{{ "%.2f"|format(item.line_total) }}</strong>
+          <form method="post" action="{{ url_for('remove_from_cart', product_id=item.product.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% if item.size %}<input type="hidden" name="size" value="{{ item.size }}">{% endif %}
+            {% if item.color %}<input type="hidden" name="color" value="{{ item.color }}">{% endif %}
+            <button class="remove-button" type="submit" aria-label="Remove {{ item.product.name }}{% if item.size %} size {{ item.size }}{% endif %}{% if item.color %} color {{ item.color }}{% endif %}">×</button>
+          </form>
+        </article>
+      {% endfor %}
+      <a class="continue-link" href="{{ url_for('shop') }}">← &nbsp;Continue shopping</a>
+    {% else %}
+      <div class="empty-state"><h3>Your bag is taking a breather.</h3><p>Find something that fits your gameplan.</p><a class="button button-light" href="{{ url_for('shop') }}">Explore the collection</a></div>
+    {% endif %}
+  </div>
+  <aside class="panel summary-panel">
+    <div class="panel-heading"><h2>Order Summary</h2></div>
+    <div class="summary-row"><span>Subtotal ({{ cart_count }} items)</span><strong>₱{{ "%.2f"|format(subtotal) }}</strong></div>
+    <div class="summary-row"><span>Shipping</span><strong>{% if items %}₱100.00{% else %}₱0.00{% endif %}</strong></div>
+    <div class="summary-row summary-total"><span>Total</span><strong>₱{{ "%.2f"|format(subtotal + (100 if items else 0)) }}</strong></div>
+    {% if items %}<a class="button button-light button-full" href="{{ url_for('checkout') }}">Proceed to checkout <span>→</span></a>{% else %}<a class="button button-muted button-full" href="{{ url_for('shop') }}">Continue shopping</a>{% endif %}
+    <p class="summary-note">◇ &nbsp;Your order details are protected.</p>
+  </aside>
+</section>
+{% endblock %}

@@ -1,0 +1,30 @@
+<article class="product-card{% if request.endpoint == 'shop' %} shop-product-card{% elif request.endpoint == 'home' %} home-product-card{% endif %}">
+  {% set customer_review = completed_product_by_id.get(product.id) if request.endpoint == 'shop' else none %}
+  <a class="product-image{% if request.endpoint == 'shop' %} quick-view-trigger{% endif %}" href="{{ url_for('product_detail', product_id=product.id) }}"{% if request.endpoint == 'shop' %} aria-haspopup="dialog" data-product-name="{{ product.name }}" data-product-category="{{ product.category }}" data-product-price="{{ product.price }}" data-product-description="{{ product.description }}" data-product-image="{{ product.image_url or url_for('static', filename='img/product-placeholder.svg') }}" data-product-gallery="{{ product.image_urls|tojson|forceescape }}" data-product-colors="{{ product.colors|tojson|forceescape }}" data-product-stock="{{ product.stock }}" data-product-rating-average="{{ product.average_rating }}" data-product-rating-count="{{ product.rating_count }}" data-product-review-page-url="{{ url_for('product_detail', product_id=product.id, _anchor='product-reviews') }}" data-cart-url="{{ url_for('add_to_cart', product_id=product.id) }}" data-return-url="{{ request.full_path }}"{% endif %}>
+    {% if request.endpoint in ('home', 'shop') %}<span class="product-badge">New</span>{% elif product.featured %}<span class="product-badge">Featured</span>{% endif %}
+    <img src="{{ product.image_url or url_for('static', filename='img/product-placeholder.svg') }}" alt="{{ product.name }}" loading="lazy">
+  </a>
+  {% if request.endpoint in ('shop', 'home') %}<button class="favorite-toggle" type="button" aria-label="Add {{ product.name }} to favorites" aria-pressed="false">♡</button>{% endif %}
+  <div class="product-info">
+    <a href="{{ url_for('product_detail', product_id=product.id) }}" class="product-name">{{ product.name }}</a>
+    <span class="product-category">{{ product.category }}</span>
+    {% set rounded_rating = (product.average_rating + 0.5)|int %}
+    <span class="product-rating-summary" aria-label="{% if product.rating_count %}{{ '%.1f'|format(product.average_rating) }} out of 5 from {{ product.rating_count }} ratings{% else %}No ratings yet{% endif %}">
+      <span class="rating-stars" aria-hidden="true">{% for star in range(1, 6) %}<span{% if star <= rounded_rating %} class="is-filled"{% endif %}>★</span>{% endfor %}</span>
+      {% if product.rating_count %}<small>{{ "%.1f"|format(product.average_rating) }} ({{ product.rating_count }})</small>{% else %}<small>No ratings</small>{% endif %}
+    </span>
+    <strong class="product-price">₱{{ "%.2f"|format(product.price) }}</strong>
+    {% if not (current_user.is_authenticated and current_user.is_admin) %}
+      {% if product.stock > 0 and (product.category == 'T-Shirts' or product.colors) %}
+        <a class="button button-dark button-small{% if request.endpoint in ('shop', 'home') %} shop-select-options{% endif %}" href="{{ url_for('product_detail', product_id=product.id) }}" aria-label="Choose options for {{ product.name }}">♧</a>
+      {% elif product.stock > 0 %}
+        <form method="post" action="{{ url_for('add_to_cart', product_id=product.id) }}"{% if request.endpoint == 'shop' %} class="shop-add-form"{% endif %}>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="button button-dark button-small" type="submit" aria-label="Add {{ product.name }} to bag">{% if request.endpoint == 'shop' %}♧{% else %}♧ &nbsp;Add to Bag{% endif %}</button>
+        </form>
+      {% else %}
+        <button class="button button-muted button-small" disabled>Sold Out</button>
+      {% endif %}
+    {% endif %}
+  </div>
+</article>

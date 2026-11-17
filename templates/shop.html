@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Shop | Gameplan Apparel{% endblock %}
+{% block content %}
+<section class="shop-hero shop-collection-hero">
+  <div>
+    <p class="eyebrow">PRODUCT COLLECTION</p>
+    <h1>SHOP COLLECTION</h1>
+    <p>Streetwear essentials for your everyday game.</p>
+  </div>
+</section>
+<section class="shop-layout page-wrap">
+  <aside class="filters">
+    <h2>Filters <span aria-hidden="true">☷</span></h2>
+    <form method="get" action="{{ url_for('shop') }}">
+      <input type="hidden" name="sort" value="{{ selected_sort }}">
+      {% if selected_color %}<input type="hidden" name="color" value="{{ selected_color }}">{% endif %}
+      <fieldset class="filter-group category-filter" id="collection-filters">
+        <legend>Category</legend>
+        <label><input type="radio" name="category" value="" {% if not selected_category %}checked{% endif %}><span>All Products</span></label>
+        {% for category in categories %}
+          <label><input type="radio" name="category" value="{{ category }}" {% if category == selected_category %}checked{% endif %}><span>{{ category }}</span></label>
+        {% endfor %}
+      </fieldset>
+      <button class="button button-light button-full" type="submit">Apply filters</button>
+      <a class="clear-filters" href="{{ url_for('shop') }}">Clear all</a>
+    </form>
+  </aside>
+  <div class="shop-results">
+    <div class="section-heading shop-toolbar">
+      <div>
+        <h2>{{ selected_category or 'All Products' }}</h2>
+        <p>{{ products|length }} product{% if products|length != 1 %}s{% endif %} available</p>
+      </div>
+      <div class="shop-controls">
+        <form class="sort-control" method="get" action="{{ url_for('shop') }}">
+          {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+          {% if search %}<input type="hidden" name="q" value="{{ search }}">{% endif %}
+          {% if request.args.get('min_price') %}<input type="hidden" name="min_price" value="{{ request.args.get('min_price') }}">{% endif %}
+          {% if request.args.get('max_price') %}<input type="hidden" name="max_price" value="{{ request.args.get('max_price') }}">{% endif %}
+          {% if selected_color %}<input type="hidden" name="color" value="{{ selected_color }}">{% endif %}
+          <label for="sort-products">Sort by</label>
+          <select id="sort-products" name="sort">
+            <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Newest</option>
+            <option value="price-low" {% if selected_sort == 'price-low' %}selected{% endif %}>Price: Low to High</option>
+            <option value="price-high" {% if selected_sort == 'price-high' %}selected{% endif %}>Price: High to Low</option>
+          </select>
+        </form>
+        <div class="view-toggle" role="group" aria-label="Product layout">
+          <button type="button" class="view-toggle-button is-active" data-view="grid" aria-label="Grid view" aria-pressed="true">▦</button>
+          <button type="button" class="view-toggle-button" data-view="list" aria-label="List view" aria-pressed="false">☷</button>
+        </div>
+      </div>
+    </div>
+    {% if products %}
+      <div class="shop-product-grid" id="product-grid">
+        {% for product in products %}
+          {% include "_product_card.html" %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state"><h3>Our shop is getting ready</h3><p>There are no products available at the moment. Please check back soon.</p></div>
+    {% endif %}
+  </div>
+</section>
+<dialog class="quick-view-dialog" id="quick-view-dialog" aria-labelledby="quick-view-title">
+  <div class="quick-view-panel">
+    <button class="quick-view-close" type="button" aria-label="Close product details" data-close-quick-view>×</button>
+    <div class="quick-view-gallery">
+      <img id="quick-view-image" alt="">
+      <div class="quick-view-thumbnails" id="quick-view-thumbnails" role="group" aria-label="Product images" hidden></div>
+    </div>
+    <div class="quick-view-details">
+      <span class="quick-view-category" id="quick-view-category"></span>
+      <h2 id="quick-view-title"></h2>
+      <p class="quick-view-price" id="quick-view-price"></p>
+      <p class="quick-view-description" id="quick-view-description"></p>
+      <p class="quick-view-stock" id="quick-view-stock"></p>
+      {% if not current_user.is_admin %}
+        <form class="quick-view-form" id="quick-view-form" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="return_to" id="quick-view-return-to">
+          <fieldset class="quick-view-sizes" id="quick-view-sizes" hidden>
+            <legend>Size <span id="quick-view-size-selection"></span></legend>
+            <div class="quick-view-size-options">
+              {% for size in ('S', 'M', 'L') %}
+                <label><input type="radio" name="size" value="{{ size }}" disabled required><span>{{ size }}</span></label>
+              {% endfor %}
+            </div>
+          </fieldset>
+          <fieldset class="quick-view-sizes" id="quick-view-colors" hidden>
+            <legend>Color</legend>
+            <div class="quick-view-size-options">
+              {% for color in ('Black', 'White', 'Grey') %}
+                <label><input type="radio" name="color" value="{{ color }}" disabled required><span>{{ color }}</span></label>
+              {% endfor %}
+            </div>
+          </fieldset>
+          <div class="quantity-picker">
+            <label for="quick-view-quantity">Quantity</label>
+            <div class="quantity-control">
+              <button type="button" data-quantity-step="-1" aria-label="Decrease quantity">−</button>
+              <input id="quick-view-quantity" name="quantity" type="number" value="1" min="1" max="10">
+              <button type="button" data-quantity-step="1" aria-label="Increase quantity">+</button>
+            </div>
+          </div>
+          <div class="quick-view-actions">
+            <button class="button button-light" type="submit">♧ &nbsp;Add to Cart</button>
+            <button class="button button-outline" id="quick-view-buy-now" type="submit">⚡ &nbsp;Buy Now</button>
+          </div>
+        </form>
+        <div class="quick-view-promises">
+          <span>◇ Secure checkout</span><span>♧ Fast delivery</span><span>◉ Support</span>
+        </div>
+      {% endif %}
+      <section class="quick-view-rating" id="quick-view-rating" aria-labelledby="quick-view-rating-title">
+        <h3 id="quick-view-rating-title">Ratings &amp; Reviews</h3>
+        <div class="quick-view-rating-summary">
+          <span class="rating-stars" id="quick-view-rating-stars" aria-hidden="true">
+            {% for star in range(1, 6) %}<span data-rating-star="{{ star }}">★</span>{% endfor %}
+          </span>
+          <span id="quick-view-rating-count">No ratings yet (0)</span>
+        </div>
+        <a class="quick-view-reviews-link" id="quick-view-reviews-link" href="#">View all reviews →</a>
+      </section>
+    </div>
+  </div>
+</dialog>
+{% endblock %}

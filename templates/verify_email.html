@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Verify Email | Gameplan Apparel{% endblock %}
+{% block content %}
+<section class="auth-wrap">
+  <div class="auth-shell">
+    <aside class="auth-visual">
+      <a class="auth-brand" href="{{ url_for('home') }}" aria-label="Gameplan Apparel home">
+        <img class="brand-logo" src="{{ url_for('static', filename='img/gameplan-logo.png') }}" alt="">
+        <span class="brand-copy"><strong>GAMEPLAN</strong><small>APPAREL CO.</small></span>
+      </a>
+      <div class="auth-visual-copy">
+        <p class="auth-kicker">EMAIL VERIFICATION</p>
+        <h2>One last<br>step.</h2>
+        <p>Verify your email to activate your account.</p>
+      </div>
+      <div class="auth-visual-note"><span>03</span><span>SECURE YOUR ACCOUNT</span><i></i></div>
+    </aside>
+
+    <div class="auth-content">
+      <div class="auth-intro">
+        <p class="auth-kicker">CHECK YOUR INBOX</p>
+        <h1>Enter your code</h1>
+        <p>We sent a 6-digit code to <strong>{{ email }}</strong>. It expires in 10 minutes.</p>
+      </div>
+
+      {% if error %}
+      <p class="flash flash-error" role="alert">{{ error }}</p>
+      {% endif %}
+
+      <form class="form-panel auth-panel" method="post" action="{{ url_for('verify_email') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="otp">Verification code</label>
+        <input id="otp" name="otp" type="text" inputmode="numeric" autocomplete="one-time-code"
+               pattern="[0-9]{6}" minlength="6" maxlength="6" required autofocus
+               aria-describedby="otp-help" placeholder="000000">
+        <small id="otp-help" class="auth-help">Check your inbox and spam folder.</small>
+        <button class="button button-dark button-full auth-submit" type="submit">
+          Verify email <span aria-hidden="true">→</span>
+        </button>
+      </form>
+
+      <form method="post" action="{{ url_for('resend_verification_email') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="button button-outline button-full" type="submit">Resend code</button>
+      </form>
+      <p class="auth-footnote"><a href="{{ url_for('register') }}">Back to registration</a></p>
+    </div>
+  </div>
+</section>
+{% endblock %}

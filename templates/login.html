@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Sign In | Gameplan Apparel{% endblock %}
+{% block content %}
+<section class="auth-wrap auth-login-page">
+  <div class="auth-login-layout">
+    <div class="auth-login-photo" aria-hidden="true"></div>
+    <aside class="auth-login-visual">
+      <img class="auth-watermark auth-watermark-top" src="{{ url_for('static', filename='img/gameplan-logo.png') }}" alt="">
+      <div class="auth-login-brand">
+        <img class="auth-login-brand-mark" src="{{ url_for('static', filename='img/gameplan-logo.png') }}" alt="">
+        <h1>GAMEPLAN</h1>
+        <p>Premium Casual Wear</p>
+        <div class="auth-brand-benefits" aria-label="Quality, style, and comfort">
+          <div>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 2.8 20 6v5.2c0 5-3.4 8.3-8 10-4.6-1.7-8-5-8-10V6l8-3.2Z"></path><path d="m8.5 11.8 2.2 2.2 4.8-5"></path></svg>
+            <span>Quality</span>
+          </div>
+          <div>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M9 3.5a3 3 0 0 0 6 0"></path><path d="M12 6.5v4l8 6.5a2 2 0 0 1-1.3 3.5H5.3A2 2 0 0 1 4 17l8-6.5"></path></svg>
+            <span>Style</span>
+          </div>
+          <div>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m13.5 2.5-9 11h7l-1 8 9-12h-7l1-7Z"></path></svg>
+            <span>Comfort</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="auth-login-content">
+      <img class="auth-watermark auth-watermark-bottom" src="{{ url_for('static', filename='img/gameplan-logo.png') }}" alt="">
+      <div class="auth-login-card">
+        <div class="auth-login-logo" aria-label="Gameplan">
+          <img class="auth-login-logo-image" src="{{ url_for('static', filename='img/gameplan-logo.png') }}" alt="">
+        </div>
+        <h2>Welcome Back!</h2>
+        <p class="auth-login-description">Log in to your account</p>
+
+        <form class="form-panel auth-panel auth-login-form" method="post" action="{{ url_for('login', next=request.args.get('next')) if request.args.get('next') else url_for('login') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <label class="sr-only" for="email">Email Address</label>
+          <div class="auth-input-wrap">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 20c.5-3.5 3.2-5.5 7-5.5s6.5 2 7 5.5"></path></svg>
+            <input id="email" name="email" type="email" required autocomplete="email" placeholder="Email or Username" value="{{ request.form.get('email', '') }}">
+          </div>
+
+          <label class="sr-only" for="password">Password</label>
+          <div class="auth-input-wrap">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path><path d="M12 14v3"></path></svg>
+            <input id="password" name="password" type="password" required autocomplete="current-password" placeholder="Password">
+            <button class="password-toggle" type="button" aria-label="Show password" aria-pressed="false" aria-controls="password">
+              <svg class="eye-open" aria-hidden="true" viewBox="0 0 24 24"><path d="M2.5 12s3.3-6 9.5-6 9.5 6 9.5 6-3.3 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg>
+              <svg class="eye-closed" aria-hidden="true" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 6.2A10.7 10.7 0 0 1 12 6c6.2 0 9.5 6 9.5 6a15 15 0 0 1-3.1 3.6M6.2 6.3C3.8 7.8 2.5 12 2.5 12s3.3 6 9.5 6a10 10 0 0 0 3-.5"></path><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"></path></svg>
+            </button>
+          </div>
+
+          <button class="button button-light button-full auth-login-submit" type="submit">Log In <span aria-hidden="true">→</span></button>
+        </form>
+
+        <div class="auth-create-divider">
+          <span>Don’t have an account?</span>
+          <a href="{{ url_for('register') }}">Sign Up</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

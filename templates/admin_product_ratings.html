@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} Ratings | Gameplan Apparel{% endblock %}
+{% block content %}
+<section class="page-banner">
+  <div class="page-wrap">
+    <p class="eyebrow">STORE ADMIN</p>
+    <h1>PRODUCT RATINGS.</h1>
+    <p>{{ product.name }}</p>
+  </div>
+</section>
+<section class="page-wrap admin-panel panel">
+  <div class="panel-heading">
+    <h2>Customer ratings</h2>
+    <div class="shop-controls">
+      <a class="button button-outline button-small" href="{{ url_for('dashboard') }}">← Back to My Account</a>
+      <a class="button button-outline button-small" href="{{ url_for('admin_products') }}">Back to products</a>
+    </div>
+  </div>
+  <p class="admin-rating-total">
+    <strong>{{ "%.1f"|format(rating_summary.average_rating or 0) }} / 5</strong>
+    <span>★</span> from {{ rating_summary.rating_count }} rating{% if rating_summary.rating_count != 1 %}s{% endif %}
+  </p>
+  {% if ratings %}
+    <div class="orders-table-wrap">
+      <table class="orders-table admin-product-ratings-table">
+        <thead><tr><th>Customer</th><th>Stars</th><th>Review</th><th>Date</th></tr></thead>
+        <tbody>
+          {% for rating in ratings %}
+            <tr>
+              <td><strong>{{ rating.customer_name }}</strong><br><small>{{ rating.customer_email }}</small></td>
+              <td><span class="rating-stars" aria-label="{{ rating.rating }} out of 5 stars">{% for star in range(1, 6) %}<span{% if star <= rating.rating %} class="is-filled"{% endif %} aria-hidden="true">★</span>{% endfor %}</span></td>
+              <td>{{ rating.review_text }}</td>
+              <td>{{ rating.created_at.strftime("%b %d, %Y") if rating.created_at else "" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="empty-note">This product does not have any ratings yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

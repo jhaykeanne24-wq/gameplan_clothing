@@ -1,0 +1,31 @@
+<section class="hero">
+  <div class="hero-slides" data-hero-slideshow aria-hidden="true">
+    {% for image in hero_slides %}
+      <img class="hero-slide{% if loop.first %} is-active{% endif %}" src="{{ url_for('static', filename=image) }}" alt=""{% if loop.first %} fetchpriority="high"{% else %} loading="lazy"{% endif %}>
+    {% endfor %}
+  </div>
+  <img class="hero-watermark" src="{{ url_for('static', filename='img/gameplan-logo.png') }}" alt="" aria-hidden="true">
+  <div class="hero-copy">
+    <p class="eyebrow">GAMEPLAN APPAREL CO.</p>
+    <h1>MAKE YOUR<br>OWN GAMEPLAN<br>KID.</h1>
+    <p class="hero-subtitle">Streetwear essentials for your everyday game.</p>
+    <div class="hero-actions">
+      {% if current_user.is_authenticated %}
+      <a class="button button-light" href="{{ url_for('shop') }}">Shop Now <span>→</span></a>
+      {% else %}
+      <a class="button button-light" href="{{ url_for('register') }}">Create Account <span>→</span></a>
+      <a class="button button-outline" href="{{ url_for('login') }}">Log In</a>
+      {% endif %}
+    </div>
+  </div>
+  {% if hero_slides|length > 1 %}
+    <div class="hero-controls" aria-label="Hero slideshow controls">
+      <div class="hero-dots" role="group" aria-label="Choose a slide">
+        {% for image in hero_slides %}
+          <button class="hero-dot" type="button" aria-label="Show slide {{ loop.index }}" aria-pressed="{{ 'true' if loop.first else 'false' }}" data-hero-slide="{{ loop.index0 }}"></button>
+        {% endfor %}
+      </div>
+      <button class="hero-toggle" type="button" aria-label="Pause slideshow" aria-pressed="false"><span aria-hidden="true">Ⅱ</span></button>
+    </div>
+  {% endif %}
+</section>

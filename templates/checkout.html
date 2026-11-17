@@ -1,0 +1,37 @@
+S{% extends "base.html" %}
+{% block title %}Checkout | Gameplan Apparel{% endblock %}
+{% block content %}
+<section class="page-banner checkout-banner"><div class="page-wrap"><p class="eyebrow">CHECKOUT</p><h1>MAKE IT YOURS.</h1><p>Shipping information and payment choice.</p></div></section>
+<div class="checkout-steps page-wrap"><span class="step-done">1 &nbsp;Bag</span><i></i><span class="step-current">2 &nbsp;Shipping &amp; payment</span><i></i><span>3 &nbsp;Complete</span></div>
+<form class="checkout-layout page-wrap" method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="checkout-forms">
+    <section class="panel form-panel-inner">
+      <div class="panel-heading"><div><h2>⌖ &nbsp;Shipping Information</h2><p>Enter your delivery details.</p></div></div>
+      <div class="form-grid">
+        <label>Full name *<input name="full_name" required maxlength="255" autocomplete="name" value="{{ request.form.get('full_name', current_user.name) }}"></label>
+        <label>Contact number *<input name="phone" required maxlength="30" autocomplete="tel" placeholder="e.g. 0917 123 4567" value="{{ request.form.get('phone', '') }}"></label>
+        <label class="field-wide">Email address *<input name="email" type="email" required maxlength="255" autocomplete="email" value="{{ request.form.get('email', current_user.email) }}"></label>
+        <label class="field-wide">House no., street *<input name="address" required maxlength="255" autocomplete="street-address" placeholder="House No., Street" value="{{ request.form.get('address', '') }}"></label>
+        <label>Province *<input name="province" required maxlength="255" value="{{ request.form.get('province', '') }}"></label>
+        <label>City / Municipality *<input name="city" required maxlength="255" value="{{ request.form.get('city', '') }}"></label>
+        <label>Barangay *<input name="barangay" required maxlength="100" autocomplete="address-level3" value="{{ request.form.get('barangay', '') }}"></label>
+        <label>Postal code *<input name="postal_code" required maxlength="20" value="{{ request.form.get('postal_code', '') }}"></label>
+      </div>
+    </section>
+    <section class="panel form-panel-inner">
+      <div class="panel-heading"><div><h2>▣ &nbsp;Payment Method</h2><p>Cash on Delivery only.</p></div></div>
+      <label class="payment-option"><input type="radio" name="payment_method" value="cod" required checked><span><strong>Cash on Delivery</strong><small>Pay when your order arrives</small></span><b>COD</b></label>
+    </section>
+  </div>
+  <aside class="panel summary-panel">
+    <div class="panel-heading"><h2>Order Summary</h2><span>{{ items|length }} items</span></div>
+    {% for item in items %}<div class="mini-cart-item"><img src="{{ item.product.image_url or url_for('static', filename='img/product-placeholder.svg') }}" alt=""><div><strong>{{ item.product.name }}</strong><small>{% if item.size %}Size {{ item.size }} · {% endif %}{% if item.color %}Color {{ item.color }} · {% endif %}{{ item.quantity }} × ₱{{ "%.2f"|format(item.product.price) }}</small></div><b>₱{{ "%.2f"|format(item.line_total) }}</b></div>{% endfor %}
+    <div class="summary-row"><span>Subtotal</span><strong>₱{{ "%.2f"|format(subtotal) }}</strong></div>
+    <div class="summary-row"><span>Shipping fee</span><strong>₱{{ "%.2f"|format(shipping_fee) }}</strong></div>
+    <div class="summary-row summary-total"><span>Total</span><strong>₱{{ "%.2f"|format(total) }}</strong></div>
+    <button class="button button-light button-full" type="submit">Place order <span>→</span></button>
+    <p class="summary-note">◇ &nbsp;Your order details are protected.</p>
+  </aside>
+</form>
+{% endblock %}

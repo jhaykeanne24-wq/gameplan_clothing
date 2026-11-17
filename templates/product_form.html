@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{% if product %}Edit Product{% else %}Add Product{% endif %} | Gameplan Apparel{% endblock %}
+{% block content %}
+<section class="page-wrap product-admin-form">
+  <form class="form-panel" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <p class="eyebrow">STORE ADMIN</p><h1>{% if product %}Edit product{% else %}Add a product{% endif %}</h1>
+    <label class="product-image-field">Product image
+      <span class="product-image-upload-box">
+        <img id="product-image-preview" src="{{ product.image_url if product else '' }}" alt="Product image preview"{% if not product or not product.image_url %} hidden{% endif %}>
+        <span id="product-image-placeholder"{% if product and product.image_url %} hidden{% endif %}>
+          <strong>Choose a product image</strong>
+          <small>JPG, PNG, or WebP · up to 8 MB</small>
+        </span>
+        <input id="product-image-input" name="image" type="file" accept="image/jpeg,image/png,image/webp"{% if not product or not product.image_url %} required{% endif %}>
+      </span>
+      <small id="product-image-filename">{% if product and product.image_url %}Choose a new image to replace the current one.{% endif %}</small>
+    </label>
+    <label class="product-image-field">Additional product photos
+      <span class="product-image-upload-box">
+        <span>
+          <strong>Add gallery images</strong>
+          <small>Magdagdag ng JPG, PNG, o WebP hanggang 3 photos total.</small>
+        </span>
+        <input id="gallery-image-input" name="gallery_images" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+      </span>
+    </label>
+    <small class="gallery-image-error" id="gallery-image-error" role="alert"></small>
+    <div class="product-gallery-preview" id="gallery-image-preview" data-existing-images="{{ gallery_images|map(attribute='image_url')|list|tojson|forceescape }}" aria-label="Additional product image previews">
+      {% for image in gallery_images %}<img src="{{ image.image_url }}" alt="Existing gallery image {{ loop.index }}">{% endfor %}
+    </div>
+    <small>Idinadagdag ang bagong photos sa kasalukuyang gallery. Maximum upload size: 8 MB total.</small>
+    <label>Name<input name="name" required maxlength="150" value="{{ request.form.get('name', product.name if product else '') }}"></label>
+    <label>URL slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" value="{{ request.form.get('slug', product.slug if product else '') }}"></label>
+    <label>Description<textarea name="description" rows="4" maxlength="2000">{{ request.form.get('description', product.description if product else '') }}</textarea></label>
+    <label>Category<input name="category" required maxlength="50" value="{{ request.form.get('category', product.category if product else '') }}"></label>
+    <fieldset class="admin-color-options">
+      <legend>Color options</legend>
+      <div>
+        {% for color in ('Black', 'White', 'Grey') %}
+          <label><input type="checkbox" name="colors" value="{{ color }}" {% if color in selected_colors %}checked{% endif %}> {{ color }}</label>
+        {% endfor %}
+      </div>
+      <small>Optional. Piliin lang ang colors na available para sa produktong ito; shared ang stock count.</small>
+    </fieldset>
+    <div class="form-grid"><label>Price (PHP)<input name="price" type="number" min="0.01" step="0.01" required value="{{ request.form.get('price', product.price if product else '') }}"></label><label>Stock<input name="stock" type="number" min="0" step="1" required value="{{ request.form.get('stock', product.stock if product else '0') }}"></label></div>
+    <label class="checkbox-label"><input type="checkbox" name="featured" {% if request.form.get('featured') or (product and product.featured) %}checked{% endif %}> Feature this product</label>
+    <button class="button button-light button-full" type="submit">Save product</button>
+    <a class="form-switch" href="{{ url_for('admin_products') }}">Cancel</a>
+    <a class="form-switch" href="{{ url_for('dashboard') }}">← Back to My Account</a>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}My Account | Gameplan Apparel{% endblock %}
+{% block content %}
+<section class="account-hero">
+  <div class="page-wrap">
+    <p class="eyebrow">YOUR GAMEPLAN</p>
+    <h1>WELCOME, {{ current_user.name.split(' ')[0]|upper }}.</h1>
+    <p>Manage your account, track orders, and explore your favorite styles.</p>
+  </div>
+</section>
+<section class="account-dashboard page-wrap">
+  <aside class="account-nav panel">
+    <h2><span aria-hidden="true">♙</span> My Account</h2>
+    <a class="active" href="{{ url_for('dashboard') }}">Profile Details</a>
+    {% if current_user.is_admin %}
+      <a href="{{ url_for('admin_products') }}">Manage Products</a>
+      <a href="{{ url_for('admin_orders') }}">Manage Orders</a>
+    {% endif %}
+    <form method="post" action="{{ url_for('logout') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit"><span aria-hidden="true">↪</span> Sign Out</button>
+    </form>
+    <img class="account-nav-watermark" src="{{ url_for('static', filename='img/gameplan-logo.png') }}" alt="" aria-hidden="true">
+  </aside>
+  <div class="account-content">
+    <section class="account-identity panel">
+      <div class="account-avatar">
+        <img src="{{ url_for('static', filename='img/gameplan-logo.png') }}" alt="">
+      </div>
+      <div class="account-identity-copy">
+        <h2>{{ current_user.name }}</h2>
+        <p>{{ current_user.email }}</p>
+      </div>
+    </section>
+
+    <nav class="account-shortcuts" aria-label="Account shortcuts">
+      {% if current_user.is_admin %}
+        <a class="account-shortcut panel" href="{{ url_for('admin_products') }}">
+          <span class="account-shortcut-icon" aria-hidden="true">◇</span>
+          <span><strong>Manage Products</strong><small>Update your catalog</small></span>
+          <span class="account-shortcut-arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="account-shortcut panel" href="{{ url_for('admin_orders') }}">
+          <span class="account-shortcut-icon" aria-hidden="true">▤</span>
+          <span><strong>Manage Orders</strong><small>Review customer orders</small></span>
+          <span class="account-shortcut-arrow" aria-hidden="true">→</span>
+        </a>
+      {% else %}
+        <a class="account-shortcut panel" href="#recent-orders">
+          <span class="account-shortcut-icon" aria-hidden="true">◇</span>
+          <span><strong>My Orders</strong><small>Track your recent orders</small></span>
+          <span class="account-shortcut-arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="account-shortcut panel" href="{{ url_for('shop') }}">
+          <span class="account-shortcut-icon" aria-hidden="true">♧</span>
+          <span><strong>Shop Collection</strong><small>Explore your favorite styles</small></span>
+          <span class="account-shortcut-arrow" aria-hidden="true">→</span>
+        </a>
+      {% endif %}
+      <a class="account-shortcut panel" href="{{ url_for('profile') }}">
+        <span class="account-shortcut-icon" aria-hidden="true">⚙</span>
+        <span><strong>Account Settings</strong><small>Update your profile details</small></span>
+        <span class="account-shortcut-arrow" aria-hidden="true">→</span>
+      </a>
+    </nav>
+
+    {% if not current_user.is_admin %}
+      <div class="account-dashboard-grid">
+        <section class="account-recent-orders panel" id="recent-orders">
+          <div class="account-section-heading">
+            <h2><span aria-hidden="true">◇</span> Recent Orders</h2>
+            <a href="{{ url_for('shop') }}">Continue shopping <span aria-hidden="true">→</span></a>
+          </div>
+          {% if orders %}
+            <div class="orders-table-wrap">
+              <table class="orders-table">
+                <thead><tr><th>Order</th><th>Date</th><th>Status</th><th>Total</th></tr></thead>
+                <tbody>
+                  {% for order in orders %}
+                    <tr>
+                      <td><strong>#{{ order.id }}</strong></td>
+                      <td>{{ order.created_at.strftime('%b %d, %Y') }}</td>
+                      <td><span class="status-pill status-{{ order.status }}">{{ order.status|replace('_', ' ')|title }}</span></td>
+                      <td>₱{{ "%.2f"|format(order.total) }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="account-orders-empty">
+              <h3>No orders yet</h3>
+              <p>Your next favorite is waiting for you.</p>
+              <a class="button button-light" href="{{ url_for('shop') }}">Shop the collection</a>
+            </div>
+          {% endif %}
+        </section>
+        <aside class="account-benefits panel">
+          <p class="eyebrow">GAMEPLAN APPAREL</p>
+          <h2>MADE FOR<br>YOUR GAMEPLAN.</h2>
+          <ul>
+            <li>Check your latest order status</li>
+            <li>Keep your account details up to date</li>
+            <li>Explore new apparel and styles</li>
+          </ul>
+        </aside>
+      </div>
+    {% else %}
+      <section class="account-admin-welcome panel">
+        <p class="eyebrow">STORE ADMIN</p>
+        <h2>Keep your store on track.</h2>
+        <p>Manage the product catalog and review customer orders from your account.</p>
+      </section>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

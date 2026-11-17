@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} | Gameplan Apparel{% endblock %}
+{% block content %}
+<div class="breadcrumb page-wrap"><a href="{{ url_for('home') }}">Home</a><span>›</span><a href="{{ url_for('shop') }}">Shop</a>{% if product.category %}<span>›</span><a href="{{ url_for('shop', category=product.category) }}">{{ product.category }}</a>{% endif %}<span>›</span><strong>{{ product.name }}</strong></div>
+<section class="product-detail page-wrap">
+  <div class="product-gallery{% if detail_images|length <= 1 %} product-gallery-single{% endif %}">
+    <div class="detail-image"><img id="main-product-image" src="{{ detail_images[0] if detail_images else url_for('static', filename='img/product-placeholder.svg') }}" alt="{{ product.name }}"></div>
+    {% if detail_images|length > 1 %}
+      <div class="product-thumbnails" role="group" aria-label="Product images">
+        {% for image in detail_images %}
+          <button class="product-thumbnail{% if loop.first %} is-active{% endif %}" type="button" data-image="{{ image }}" aria-label="View product image {{ loop.index }}" aria-pressed="{{ 'true' if loop.first else 'false' }}">
+            <img src="{{ image }}" alt="" loading="lazy">
+          </button>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+  <div class="detail-copy">
+    <p class="eyebrow">GAMEPLAN APPAREL CO.</p>
+    <h1>{{ product.name }}</h1>
+    <div class="detail-price-row">
+      <p class="detail-price">₱{{ "%.2f"|format(product.price) }}</p>
+      <span class="stock-note{% if not product.stock %} is-sold-out{% endif %}">{% if product.stock > 0 %}✓ &nbsp;In Stock{% else %}Currently Sold Out{% endif %}</span>
+    </div>
+    <div class="detail-rating-summary">
+      {% set rounded_rating = (product.average_rating + 0.5)|int %}
+      <span class="rating-stars" aria-hidden="true">{% for star in range(1, 6) %}<span{% if star <= rounded_rating %} class="is-filled"{% endif %}>★</span>{% endfor %}</span>
+      <a href="#product-reviews">{% if product.rating_count %}{{ "%.1f"|format(product.average_rating) }} / 5 ({{ product.rating_count }} ratings){% else %}No ratings yet (0){% endif %}</a>
+    </div>
+    <p class="detail-description">{{ product.description }}</p>
+    <div class="detail-facts"><span>Category</span><strong>{{ product.category }}</strong><span>Availability</span><strong>{{ product.stock }} in stock</strong></div>
+
+    {% if product.stock > 0 and not current_user.is_admin %}
+      <form method="post" action="{{ url_for('add_to_cart', product_id=product.id) }}" class="detail-purchase-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="return_to" value="{{ request.path }}">
+        {% if sizes %}
+          <fieldset class="size-picker">
+            <legend>Size <span class="size-selection" aria-live="polite"></span></legend>
+            <div class="size-options">
+              {% for size in sizes %}
+                <label><input type="radio" name="size" value="{{ size }}" required><span>{{ size }}</span></label>
+              {% endfor %}
+            </div>
+          </fieldset>
+          <details class="size-guide">
+            <summary>Size Guide</summary>
+            <p>Sizes available: XS–XXL. Choose your usual fit; exact garment measurements are not available yet. If you prefer a looser fit, consider sizing up.</p>
+          </details>
+        {% endif %}
+        {% if colors %}
+          <fieldset class="size-picker color-picker">
+            <legend>Color</legend>
+            <div class="size-options">
+              {% for color in colors %}
+                <label><input type="radio" name="color" value="{{ color }}" required><span>{{ color }}</span></label>
+              {% endfor %}
+            </div>
+          </fieldset>
+        {% endif %}
+        <div class="quantity-picker">
+          <label for="quantity">Quantity</label>
+          <div class="quantity-control">
+            <button type="button" data-quantity-step="-1" aria-label="Decrease quantity">−</button>
+            <input id="quantity" name="quantity" type="number" value="1" min="1" max="{{ [product.stock, 10]|min }}">
+            <button type="button" data-quantity-step="1" aria-label="Increase quantity">+</button>
+          </div>
+        </div>
+        <div class="detail-actions">
+          <button class="button button-light detail-add-button" type="submit">♧ &nbsp; Add to Bag</button>
+          <button class="button button-outline detail-wishlist" type="button" aria-pressed="false">♡ &nbsp; Add to Wishlist</button>
+        </div>
+      </form>
+    {% endif %}
+    {% if not current_user.is_admin %}
+      <div class="detail-promises">
+        <div><span aria-hidden="true">♧</span><p><strong>Fast Delivery</strong><small>Nationwide shipping</small></p></div>
+        <div><span aria-hidden="true">◇</span><p><strong>Secure Payment</strong><small>Protected checkout</small></p></div>
+        <div><span aria-hidden="true">⬡</span><p><strong>Quality Apparel</strong><small>Made for everyday wear</small></p></div>
+      </div>
+    {% endif %}
+  </div>
+</section>
+<section class="product-reviews page-wrap" id="product-reviews" aria-labelledby="product-reviews-title">
+  <div class="product-reviews-heading">
+    <div>
+      <p class="eyebrow">VERIFIED CUSTOMER FEEDBACK</p>
+      <h2 id="product-reviews-title">Ratings &amp; Reviews</h2>
+    </div>
+    {% if product.rating_count %}
+      <p class="product-reviews-count">{{ "%.1f"|format(product.average_rating) }} / 5 <span>·</span> {{ product.rating_count }} ratings</p>
+    {% endif %}
+  </div>
+
+  <div class="product-reviews-content">
+    <div class="product-review-form-card">
+      {% if can_rate %}
+        <h3>{% if existing_review %}Update your review{% else %}Rate this product{% endif %}</h3>
+        <p>Only completed purchases can be rated. You can update your rating anytime.</p>
+        <form class="product-review-form" method="post" action="{{ url_for('submit_product_review', product_id=product.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <fieldset class="review-rating-fieldset">
+            <legend>Your rating</legend>
+            <div class="review-star-picker">
+              {% for star in range(5, 0, -1) %}
+                <input id="review-rating-{{ star }}" type="radio" name="rating" value="{{ star }}" {% if existing_review and existing_review.rating == star %}checked{% endif %} required>
+                <label for="review-rating-{{ star }}" aria-label="{{ star }} star{% if star != 1 %}s{% endif %}"><span aria-hidden="true">★</span></label>
+              {% endfor %}
+            </div>
+          </fieldset>
+          <label for="review-text">Your review</label>
+          <textarea id="review-text" name="review_text" maxlength="2000" required>{{ existing_review.review_text if existing_review else "" }}</textarea>
+          <button class="button button-light" type="submit">{% if existing_review %}Update Review{% else %}Submit Review{% endif %}</button>
+        </form>
+      {% else %}
+        <h3>Rate this product</h3>
+        <p>Sign in with the account that placed a completed order for this product to submit a rating and review.</p>
+        <fieldset class="review-rating-fieldset review-rating-fieldset-disabled" disabled>
+          <legend>Your rating</legend>
+          <div class="review-star-picker">
+            {% for star in range(5, 0, -1) %}
+              <input id="review-rating-disabled-{{ star }}" type="radio" name="rating-preview" value="{{ star }}">
+              <label for="review-rating-disabled-{{ star }}" aria-label="{{ star }} star{% if star != 1 %}s{% endif %}"><span aria-hidden="true">★</span></label>
+            {% endfor %}
+          </div>
+        </fieldset>
+      {% endif %}
+    </div>
+
+    <div class="product-review-list">
+      {% if product_reviews %}
+        {% for review in product_reviews %}
+          <article class="product-review-card">
+            <div class="review-card-heading">
+              <span class="rating-stars" aria-label="{{ review.rating }} out of 5 stars">{% for star in range(1, 6) %}<span{% if star <= review.rating %} class="is-filled"{% endif %} aria-hidden="true">★</span>{% endfor %}</span>
+              <span class="verified-review-label">Verified purchase</span>
+            </div>
+            <p>{{ review.review_text }}</p>
+          </article>
+        {% endfor %}
+      {% else %}
+        <p class="empty-note">No customer reviews yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

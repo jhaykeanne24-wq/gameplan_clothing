@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Our Location | Gameplan Apparel{% endblock %}
+{% block content %}
+<section class="contact-page contact-map-page">
+  <header class="contact-hero page-wrap">
+    <p class="eyebrow">GAMEPLAN APPAREL CO.</p>
+    <h1>OUR LOCATION</h1>
+    <p>Find us in Dayap, Calauan, Laguna.</p>
+    <span class="contact-hero-rule" aria-hidden="true"></span>
+  </header>
+
+  <section class="contact-card contact-map-card page-wrap" aria-labelledby="contact-map-title">
+    <span class="contact-map-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
+    </span>
+    <p class="eyebrow">CONTACT LOCATION</p>
+    <h2 id="contact-map-title">Address</h2>
+    <p class="contact-map-address">{{ contact_address }}</p>
+    <div class="contact-map-actions">
+      <a class="button button-outline" href="{{ url_for('contact') }}"><span aria-hidden="true">←</span> Back to Contact</a>
+      <a class="button button-light" href="{{ apple_maps_url }}" target="_blank" rel="noopener noreferrer">Open Apple Maps <span aria-hidden="true">↗</span></a>
+    </div>
+  </section>
+</section>
+{% endblock %}

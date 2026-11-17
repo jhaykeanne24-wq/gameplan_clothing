@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Gameplan Apparel | Home{% endblock %}
+{% block content %}
+{% include "_home_hero.html" %}
+
+<section class="home-services" aria-label="Store benefits">
+  <div class="home-services-inner">
+    <div class="home-service">
+      <svg aria-hidden="true" viewBox="0 0 32 32"><path d="M3 9h17v14H3zM20 14h5l4 5v4h-9z"></path><circle cx="9" cy="25" r="2.5"></circle><circle cx="24" cy="25" r="2.5"></circle></svg>
+      <p><strong>Fast &amp; Reliable Delivery</strong><small>Ship nationwide</small></p>
+    </div>
+    <div class="home-service">
+      <svg aria-hidden="true" viewBox="0 0 32 32"><path d="m16 3 11 4v8c0 7-4.5 11.5-11 14-6.5-2.5-11-7-11-14V7z"></path><path d="m11 16 3.5 3.5L21 13"></path></svg>
+      <p><strong>Secure Payment</strong><small>Safe and trusted checkout</small></p>
+    </div>
+    <div class="home-service">
+      <svg aria-hidden="true" viewBox="0 0 32 32"><path d="m16 3 12 6.5v13L16 29 4 22.5v-13z"></path><path d="m4 9.5 12 7 12-7M16 17v12M10 6.3l12 7"></path></svg>
+      <p><strong>Quality Apparel</strong><small>Premium and durable materials</small></p>
+    </div>
+    <div class="home-service">
+      <svg aria-hidden="true" viewBox="0 0 32 32"><path d="M5 18v-3a11 11 0 0 1 22 0v3"></path><rect x="3" y="17" width="6" height="9" rx="2"></rect><rect x="23" y="17" width="6" height="9" rx="2"></rect><path d="M24 26c-1 2-3 3-7 3"></path></svg>
+      <p><strong>Customer Support</strong><small>Here to help you anytime</small></p>
+    </div>
+  </div>
+</section>
+
+<section class="home-promo" aria-label="New arrivals">
+  <div class="home-promo-content">
+    <h2>NEW<br>ARRIVALS</h2>
+    <span class="home-promo-divider" aria-hidden="true"></span>
+    <p>Fresh drops, new styles, and<br>exclusive designs.</p>
+  </div>
+</section>
+
+{% endblock %}

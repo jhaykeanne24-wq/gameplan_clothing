@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Gameplan Apparel — streetwear essentials for your everyday game.">
+  <title>{% block title %}Gameplan Apparel{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='20261117-header-search-removed') }}">
+</head>
+<body{% if request.endpoint == 'welcome' %} class="entry-page"{% elif request.endpoint == 'home' %} class="home-page"{% elif request.endpoint in ('login', 'register') %} class="auth-page"{% elif request.endpoint in ('contact', 'contact_map') %} class="contact-body"{% endif %}>
+  <header class="site-header">
+    <a class="brand" href="{{ url_for('home') }}" aria-label="Gameplan Apparel home">
+      <img class="brand-logo" src="{{ url_for('static', filename='img/gameplan-logo.png') }}" alt="">
+      <span class="brand-copy"><strong>GAMEPLAN</strong><small>APPAREL CO.</small></span>
+    </a>
+    <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="{{ url_for('home') }}"{% if request.endpoint == 'home' %} class="active" aria-current="page"{% endif %}>Home</a>
+      <a href="{{ url_for('shop') }}"{% if request.endpoint in ('shop', 'product_detail') %} class="active" aria-current="page"{% endif %}>Shop</a>
+      <a href="{{ url_for('about') }}"{% if request.endpoint == 'about' %} class="active" aria-current="page"{% endif %}>About</a>
+      <a href="{{ url_for('contact') }}"{% if request.endpoint in ('contact', 'contact_map') %} class="active" aria-current="page"{% endif %}>Contact</a>
+    </nav>
+    <div class="header-actions">
+      {% if current_user.is_authenticated %}
+        {% if current_user.is_admin %}
+          <button class="icon-link notification-link" type="button" aria-label="{% if new_order_count %}{{ new_order_count }} new orders{% else %}Notifications{% endif %}" aria-expanded="false" aria-controls="order-notification-panel" title="Notifications" data-order-notifications-url="{{ url_for('admin_order_notifications') }}" data-latest-order-id="{{ latest_order_id }}">
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+              <path d="M10 21h4"></path>
+            </svg>
+            <span class="notification-count"{% if not new_order_count %} hidden{% endif %}>{{ new_order_count }}</span>
+          </button>
+          <section class="order-notification-panel" id="order-notification-panel" aria-label="Recent order notifications" hidden>
+            <div class="order-notification-panel-heading"><h2>Notifications</h2><a href="{{ url_for('admin_orders') }}">Manage orders</a></div>
+            <p data-order-notification-empty>No recent orders.</p>
+            <ul data-order-notification-list></ul>
+          </section>
+        {% endif %}
+        <a class="icon-link profile-link" href="{{ url_for('dashboard') }}" aria-label="My profile" title="My profile">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="3.5"></circle>
+            <path d="M5 20c.5-3.5 3.2-5.5 7-5.5s6.5 2 7 5.5"></path>
+          </svg>
+        </a>
+      {% else %}
+        <a class="icon-link profile-link" href="{{ url_for('login') }}" aria-label="Sign in" title="Sign in">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="3.5"></circle>
+            <path d="M5 20c.5-3.5 3.2-5.5 7-5.5s6.5 2 7 5.5"></path>
+          </svg>
+        </a>
+      {% endif %}
+      {% if not current_user.is_authenticated or not current_user.is_admin %}
+        <a class="icon-link cart-link" href="{{ url_for('cart') }}" aria-label="Shopping bag">♧<span class="cart-count">{{ cart_count }}</span></a>
+      {% endif %}
+    </div>
+  </header>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-stack" aria-live="polite">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% if current_user.is_authenticated and current_user.is_admin %}
+    <div class="order-notification-toast" id="order-notification-toast" role="status" aria-live="polite" hidden>
+      <span data-order-notification-message></span>
+      <button type="button" aria-label="Dismiss notification" data-dismiss-order-notification>×</button>
+    </div>
+  {% endif %}
+
+  <main>{% block content %}{% endblock %}</main>
+
+  <footer class="site-footer" id="contact">
+    {% if request.endpoint != 'home' %}
+      <div class="service-strip">
+        <div><span class="service-icon">♧</span><p><strong>Fast &amp; Reliable Delivery</strong><small>Ship nationwide</small></p></div>
+        <div><span class="service-icon">◇</span><p><strong>Secure Checkout</strong><small>Safe and trusted checkout</small></p></div>
+        <div><span class="service-icon">⬡</span><p><strong>Quality Apparel</strong><small>Premium and durable materials</small></p></div>
+        <div><span class="service-icon">♧</span><p><strong>Customer Support</strong><small>Here to help you anytime</small></p></div>
+      </div>
+    {% endif %}
+    <div class="footer-bottom">
+      <a class="brand footer-brand" href="{{ url_for('home') }}"><img class="brand-logo" src="{{ url_for('static', filename='img/gameplan-logo.png') }}" alt=""><span class="brand-copy"><strong>GAMEPLAN</strong><small>APPAREL CO.</small></span></a>
+      <p>Make your own gameplan kid.</p>
+      <p>© {{ 2026 }} Gameplan Apparel Co.</p>
+    </div>
+  </footer>
+  <script src="{{ url_for('static', filename='js/main.js', v='20261117-admin-quick-view-1') }}" defer></script>
+</body>
+</html>
