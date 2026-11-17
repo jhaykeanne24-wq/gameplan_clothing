@@ -91,6 +91,7 @@ def create_app(test_config=None):
     csrf.init_app(app)
     login_manager.init_app(app)
 
+    
     def ensure_database():
         if not app.extensions["database_initialized"]:
             database.initialize()
@@ -98,7 +99,8 @@ def create_app(test_config=None):
 
     @app.before_request
     def initialize_database():
-        ensure_database()
+        if not app.config.get("PRODUCTION", False):
+            ensure_database()
 
     @app.before_request
     def keep_authenticated_sessions_in_browser_session():

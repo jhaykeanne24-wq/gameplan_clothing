@@ -165,14 +165,26 @@ class Database:
             statements.append(buffer.strip())
         return [statement for statement in statements if statement]
 
+    
     @property
     def pool(self):
         if self._pool is None:
             if MySQLConnectionPool is None:
                 raise RuntimeError(
-                    "mysql-connector-python is required. Install it with: pip install mysql-connector-python"
+                    "mysql-connector-python is required."
                 )
+
             db_password = self._config["MYSQL_PASSWORD"]
+
+            ssl_options = {}
+
+            if self._config.get("MYSQL_SSL_CA"):
+                ssl_options = {
+                    "ssl_ca": self._config["MYSQL_SSL_CA"],
+                    "ssl_verify_cert": True,
+                    "ssl_verify_identity": True,
+                }
+
             self._pool = MySQLConnectionPool(
                 pool_name="gameplan_pool",
                 pool_size=5,
@@ -182,8 +194,11 @@ class Database:
                 password=db_password,
                 database=self._config["MYSQL_DATABASE"],
                 autocommit=False,
+                **ssl_options,
             )
+
         return self._pool
+
 
     @contextmanager
     def connection(self):
